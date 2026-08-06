@@ -3,36 +3,25 @@
 namespace Platform\Customer\Livewire\Company;
 
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Platform\Organization\Models\OrganizationEntity;
 use Platform\Customer\Models\RiskAssessment;
+use Platform\Customer\Support\CompanySections;
 
 /**
- * Betrieb/Abteilung-Detail — Betriebs-Cockpit mit Tab-Navigation (deep-linkable via ?tab=).
- *
- * Ein Reiter je Betrieb-Ebenen-Funktion (Anker-Prinzip). Real: Übersicht +
- * Gefährdungsbeurteilungen. Platzhalter (Klickroute/UX zuerst): Beschäftigte,
- * Betreuung, Preise, Begehungen — Logik folgt später.
+ * Betrieb/Abteilung-Detail — eine Komponente, mehrere EIGENE Routen. Der Abschnitt
+ * ergibt sich aus dem Route-Namen (CompanySections); die Navigation liegt in der
+ * inneren linken Sidebar. Real: Übersicht + Gefährdungsbeurteilungen. Platzhalter:
+ * Beschäftigte, Betreuung, Preise, Begehungen (Anker-Prinzip; Fachlogik folgt).
  */
 class Show extends Component
 {
-    /** Tab-Definition: key => [label, icon]. Reihenfolge = Klickroute. */
-    public const TABS = [
-        'overview'     => ['Übersicht',                'heroicon-o-squares-2x2'],
-        'risk'         => ['Gefährdungsbeurteilungen', 'heroicon-o-shield-exclamation'],
-        'staff'        => ['Beschäftigte',             'heroicon-o-users'],
-        'care'         => ['Betreuung',                'heroicon-o-clipboard-document-check'],
-        'pricing'      => ['Preise',                   'heroicon-o-banknotes'],
-        'inspections'  => ['Begehungen',               'heroicon-o-clipboard-document-list'],
-    ];
-
     #[Locked]
     public int $entityId;
 
-    #[Url(as: 'tab', history: true)]
-    public string $tab = 'overview';
+    #[Locked]
+    public string $section = 'overview';
 
     public bool $showCreate = false;
     public string $newTitle = '';
@@ -41,10 +30,7 @@ class Show extends Component
     public function mount(int $company): void
     {
         $this->entityId = $this->resolve($company)->id;
-
-        if (!array_key_exists($this->tab, self::TABS)) {
-            $this->tab = 'overview';
-        }
+        $this->section = CompanySections::keyForRoute(request()->route()?->getName() ?? '');
     }
 
     protected function resolve(int $id): OrganizationEntity
@@ -89,18 +75,19 @@ class Show extends Component
             ->orderBy('name')
             ->get();
 
-        $riskAssessments = RiskAssessment::query()
-            ->forTeam($team)
-            ->where('organization_entity_id', $entity->id)
-            ->orderByDesc('id')
-            ->get();
+        $riskAssessments = $this->section === 'risk'
+            ? RiskAssessment::query()
+                ->forTeam($team)
+                ->where('organization_entity_id', $entity->id)
+                ->orderByDesc('id')
+                ->get()
+            : collect();
 
         return view('customer::livewire.company.show', [
             'entity'          => $entity,
             'parent'          => $parent,
             'children'        => $children,
             'riskAssessments' => $riskAssessments,
-            'tabs'            => self::TABS,
         ])->layout('platform::layouts.app');
     }
 }

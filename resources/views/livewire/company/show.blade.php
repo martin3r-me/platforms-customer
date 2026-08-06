@@ -1,6 +1,7 @@
 {{--
-    Customer · Betrieb-Cockpit mit Tab-Navigation (deep-linkable ?tab=) — nx-Design-System.
-    Real: Übersicht + Gefährdungsbeurteilungen. Platzhalter: Beschäftigte, Betreuung, Preise, Begehungen.
+    Customer · Betrieb-Cockpit — eigene Routen je Funktion, Navigation in der inneren
+    Sidebar. Abschnitt kommt aus $section. Real: Übersicht + Gefährdungsbeurteilungen.
+    Platzhalter: Beschäftigte, Betreuung, Preise, Begehungen.
 --}}
 
 <x-ui-page>
@@ -14,7 +15,7 @@
             $parent ? ['label' => $parent->name, 'route' => 'customer.companies.show', 'params' => [$parent->id]] : null,
             ['label' => $entity->name],
         ]))">
-            @if($tab === 'risk')
+            @if($section === 'risk')
                 <x-nx-button variant="primary" size="sm" wire:click="$set('showCreate', true)">
                     @svg('heroicon-o-plus', 'w-4 h-4')
                     <span>Neue Gefährdungsbeurteilung</span>
@@ -35,19 +36,8 @@
             </div>
         </x-nx-card>
 
-        {{-- Reiter (Klickroute) --}}
-        <x-nx-tabs>
-            @foreach($tabs as $key => [$label, $icon])
-                <x-nx-tab :active="$tab === $key" wire:click="$set('tab', '{{ $key }}')"
-                          class="inline-flex items-center gap-1.5 whitespace-nowrap">
-                    @svg($icon, 'w-4 h-4')
-                    <span>{{ $label }}</span>
-                </x-nx-tab>
-            @endforeach
-        </x-nx-tabs>
-
         {{-- ═══ Übersicht ═══ --}}
-        @if($tab === 'overview')
+        @if($section === 'overview')
             <x-nx-section icon="heroicon-o-identification" title="Steckbrief"
                           description="Stammdaten & Kontakt des Betriebs (später aus CRM verheiratet).">
                 <x-nx-card>
@@ -83,7 +73,7 @@
         @endif
 
         {{-- ═══ Gefährdungsbeurteilungen (real) ═══ --}}
-        @if($tab === 'risk')
+        @if($section === 'risk')
             <x-nx-section icon="heroicon-o-shield-exclamation" title="Gefährdungsbeurteilungen" :hint="$riskAssessments->count()">
                 @if($riskAssessments->isEmpty())
                     <x-nx-card>
@@ -121,7 +111,7 @@
         @endif
 
         {{-- ═══ Beschäftigte (Platzhalter — später aggregiert aus occupational) ═══ --}}
-        @if($tab === 'staff')
+        @if($section === 'staff')
             <x-nx-section icon="heroicon-o-users" title="Beschäftigte"
                           description="Beschäftigte dieses Betriebs samt Abteilungen — später aggregiert aus dem Betriebsmedizin-Modul.">
                 <x-nx-card>
@@ -133,7 +123,7 @@
         @endif
 
         {{-- ═══ Betreuung (Platzhalter) ═══ --}}
-        @if($tab === 'care')
+        @if($section === 'care')
             <x-nx-section icon="heroicon-o-clipboard-document-check" title="Betreuung"
                           description="Betreuungsvertrag & arbeitsmedizinischer Betreuungsstatus (ArbMedVV).">
                 <x-nx-card>
@@ -145,7 +135,7 @@
         @endif
 
         {{-- ═══ Preise (Platzhalter) ═══ --}}
-        @if($tab === 'pricing')
+        @if($section === 'pricing')
             <x-nx-section icon="heroicon-o-banknotes" title="Preise & Konditionen"
                           description="Preisschienen und Konditionen je Betrieb.">
                 <x-nx-card>
@@ -157,7 +147,7 @@
         @endif
 
         {{-- ═══ Begehungen (Platzhalter) ═══ --}}
-        @if($tab === 'inspections')
+        @if($section === 'inspections')
             <x-nx-section icon="heroicon-o-clipboard-document-list" title="Begehungen"
                           description="Betriebsbegehungen mit Protokoll und Fristen.">
                 <x-nx-card>
