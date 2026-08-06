@@ -1,6 +1,6 @@
 {{--
-    Customer · Modul-Sidebar (Haupt-Sidebar links). Nur Modul-Navigation.
-    Die Betrieb-Funktions-Navigation lebt in der inneren Seiten-Sidebar (Company/Show).
+    Customer · Modul-Sidebar (Haupt-Sidebar links). Führende Navigation = Betrieb-Baum
+    (Kunden + Standorte + Abteilungen, beliebig tief). Nur var(--nx-*) Tokens.
 --}}
 
 <div>
@@ -8,23 +8,27 @@
         Betriebe
     </div>
 
-    <x-ui-sidebar-list label="Betriebe">
+    <x-ui-sidebar-list>
         <x-ui-sidebar-item :href="route('customer.dashboard')" :active="request()->routeIs('customer.dashboard')">
             @svg('heroicon-o-home', 'w-4 h-4 text-[var(--nx-text)]')
             <span class="ml-2 text-sm">Dashboard</span>
         </x-ui-sidebar-item>
         <x-ui-sidebar-item :href="route('customer.companies.index')" :active="request()->routeIs('customer.companies.index')">
-            @svg('heroicon-o-building-office-2', 'w-4 h-4 text-[var(--nx-text)]')
-            <span class="ml-2 text-sm">Betriebe</span>
+            @svg('heroicon-o-list-bullet', 'w-4 h-4 text-[var(--nx-text)]')
+            <span class="ml-2 text-sm">Alle Betriebe</span>
         </x-ui-sidebar-item>
     </x-ui-sidebar-list>
 
-    @if($companies->isNotEmpty())
-        <x-ui-sidebar-list label="Zuletzt">
-            @foreach($companies as $company)
-                <x-ui-sidebar-item :href="route('customer.companies.show', $company->id)">
-                    @svg('heroicon-o-building-office-2', 'w-4 h-4 text-[var(--nx-text)]')
-                    <span class="ml-2 text-sm truncate">{{ $company->name }}</span>
+    @if(!empty($tree))
+        <x-ui-sidebar-list label="Betriebe">
+            @foreach($tree as $node)
+                <x-ui-sidebar-item
+                    :href="route('customer.companies.show', $node['id'])"
+                    :active="(string) $activeId === (string) $node['id']">
+                    <span class="flex items-center gap-2 min-w-0" style="padding-left: {{ ($node['depth'] ?? 0) * 0.75 }}rem">
+                        @svg(($node['depth'] ?? 0) === 0 ? 'heroicon-o-building-office-2' : 'heroicon-o-building-office', 'w-4 h-4 text-[var(--nx-text)] shrink-0')
+                        <span class="text-sm truncate">{{ $node['name'] }}</span>
+                    </span>
                 </x-ui-sidebar-item>
             @endforeach
         </x-ui-sidebar-list>
