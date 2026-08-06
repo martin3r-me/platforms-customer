@@ -65,6 +65,21 @@ class CustomerServiceProvider extends ServiceProvider
         $this->registerLivewireComponents();
 
         $this->registerOrganizationIntegration();
+
+        $this->registerPatientNavigationLens();
+    }
+
+    /**
+     * Bringt die „Betrieb"-Linse in die Patienten-Navigation ein (wenn patient da ist).
+     */
+    protected function registerPatientNavigationLens(): void
+    {
+        try {
+            resolve(\Platform\Patient\Services\PatientNavigationRegistry::class)
+                ->register(new \Platform\Customer\Navigation\BetriebNavigationLens());
+        } catch (\Throwable $e) {
+            // patient-Modul nicht verfügbar — ignorieren.
+        }
     }
 
     /**
