@@ -1,0 +1,21 @@
+{
+    "name": "martin3r/platform-customer",
+    "description": "Customer - Betriebe/Kunden-Verwaltung + Projektion in den Organization-Graphen",
+    "type": "library",
+    "license": "MIT",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Platform\\Customer\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Platform\\Customer\\CustomerServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
