@@ -56,4 +56,28 @@ class Companies
 
         return $rows;
     }
+
+    /**
+     * IDs des Teilbaums: der Betrieb/die Abteilung selbst + alle Nachkommen.
+     *
+     * @return array<int,int>
+     */
+    public static function subtreeIds(int $rootId, int $teamId): array
+    {
+        $byParent = OrganizationEntity::query()
+            ->forTeam($teamId)
+            ->get(['id', 'parent_entity_id'])
+            ->groupBy('parent_entity_id');
+
+        $ids = [];
+        $walk = function ($id) use (&$walk, $byParent, &$ids): void {
+            $ids[] = (int) $id;
+            foreach (($byParent[$id] ?? collect()) as $child) {
+                $walk($child->id);
+            }
+        };
+        $walk($rootId);
+
+        return $ids;
+    }
 }

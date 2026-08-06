@@ -16,8 +16,8 @@ class CompanySections
     {
         return [
             ['key' => 'overview',     'label' => 'Übersicht',                'icon' => 'heroicon-o-squares-2x2',              'route' => 'customer.companies.show'],
+            ['key' => 'patients',     'label' => 'Patienten',                'icon' => 'heroicon-o-user-group',               'route' => 'customer.companies.patients'],
             ['key' => 'risk',         'label' => 'Gefährdungsbeurteilungen', 'icon' => 'heroicon-o-shield-exclamation',       'route' => 'customer.companies.risk-assessments'],
-            ['key' => 'staff',        'label' => 'Beschäftigte',             'icon' => 'heroicon-o-users',                    'route' => 'customer.companies.staff'],
             ['key' => 'care',         'label' => 'Betreuung',                'icon' => 'heroicon-o-clipboard-document-check', 'route' => 'customer.companies.care'],
             ['key' => 'pricing',      'label' => 'Preise',                   'icon' => 'heroicon-o-banknotes',                'route' => 'customer.companies.pricing'],
             ['key' => 'inspections',  'label' => 'Begehungen',               'icon' => 'heroicon-o-clipboard-document-list',  'route' => 'customer.companies.inspections'],

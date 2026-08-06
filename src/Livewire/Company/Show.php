@@ -7,7 +7,9 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Platform\Organization\Models\OrganizationEntity;
 use Platform\Customer\Models\RiskAssessment;
+use Platform\Customer\Support\Companies;
 use Platform\Customer\Support\CompanySections;
+use Platform\Customer\Services\CompanyPatientRegistry;
 
 /**
  * Betrieb/Abteilung-Detail — eine Komponente, mehrere EIGENE Routen. Der Abschnitt
@@ -83,11 +85,19 @@ class Show extends Component
                 ->get()
             : collect();
 
+        // Patienten: aus den Fachmodulen (Registry), über den Betrieb-Teilbaum. Nur Navigation.
+        $patients = [];
+        if ($this->section === 'patients') {
+            $entityIds = Companies::subtreeIds($entity->id, $team);
+            $patients = resolve(CompanyPatientRegistry::class)->patientsFor($entityIds, $team);
+        }
+
         return view('customer::livewire.company.show', [
             'entity'          => $entity,
             'parent'          => $parent,
             'children'        => $children,
             'riskAssessments' => $riskAssessments,
+            'patients'        => $patients,
             'sections'        => CompanySections::all(),
         ])->layout('platform::layouts.app');
     }

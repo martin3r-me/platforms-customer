@@ -110,15 +110,39 @@
             </x-nx-section>
         @endif
 
-        {{-- ═══ Beschäftigte (Platzhalter — später aggregiert aus occupational) ═══ --}}
-        @if($section === 'staff')
-            <x-nx-section icon="heroicon-o-users" title="Beschäftigte"
-                          description="Beschäftigte dieses Betriebs samt Abteilungen — später aggregiert aus dem Betriebsmedizin-Modul.">
-                <x-nx-card>
-                    <x-nx-empty icon="heroicon-o-users">
-                        Kommt: Beschäftigte werden über den Org-Teilbaum aus occupational eingesammelt (Panel-Registry).
-                    </x-nx-empty>
-                </x-nx-card>
+        {{-- ═══ Patienten (real — aus Fachmodulen aggregiert, Sprung in die Akte) ═══ --}}
+        @if($section === 'patients')
+            <x-nx-section icon="heroicon-o-user-group" title="Patienten"
+                          description="Patienten dieses Betriebs (inkl. Abteilungen) aus den Beschäftigungen — Klick springt in die Akte."
+                          :hint="count($patients)">
+                @if(empty($patients))
+                    <x-nx-card>
+                        <x-nx-empty icon="heroicon-o-user-group">
+                            Keine Patienten an diesem Betrieb. Beschäftigte werden im Betriebsmedizin-Modul angelegt.
+                        </x-nx-empty>
+                    </x-nx-card>
+                @else
+                    <x-nx-card flush class="divide-y divide-[color:var(--nx-line)]">
+                        @foreach($patients as $p)
+                            <a href="{{ $p['url'] }}" wire:navigate
+                               class="flex items-center justify-between px-4 py-2.5 hover:bg-[color:var(--nx-hover)]">
+                                <span class="flex items-center gap-2 min-w-0">
+                                    @svg('heroicon-o-user', 'w-4 h-4 text-[color:var(--nx-muted)]')
+                                    <span class="truncate text-[color:var(--nx-text)]">{{ $p['name'] }}</span>
+                                    @if(!empty($p['subtitle']))
+                                        <span class="text-xs text-[color:var(--nx-faint)]">{{ $p['subtitle'] }}</span>
+                                    @endif
+                                </span>
+                                <span class="flex items-center gap-2 shrink-0">
+                                    @if(!empty($p['meta']))
+                                        <span class="text-xs text-[color:var(--nx-faint)]">{{ $p['meta'] }}</span>
+                                    @endif
+                                    @svg('heroicon-o-chevron-right', 'w-4 h-4 text-[color:var(--nx-faint)]')
+                                </span>
+                            </a>
+                        @endforeach
+                    </x-nx-card>
+                @endif
             </x-nx-section>
         @endif
 

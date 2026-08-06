@@ -20,6 +20,9 @@ class CustomerServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/customer.php', 'customer');
+
+        // Registry, in die Fachmodule ihre Betrieb→Patienten-Provider eintragen.
+        $this->app->singleton(\Platform\Customer\Services\CompanyPatientRegistry::class);
     }
 
     public function boot(): void
