@@ -3,20 +3,36 @@
 namespace Platform\Customer\Livewire\Company;
 
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Platform\Organization\Models\OrganizationEntity;
 use Platform\Customer\Models\RiskAssessment;
 
 /**
- * Betrieb/Abteilung-Detail — Betriebs-Cockpit. Abteilungen (Kinder, nur lesend)
- * + Betrieb-verankerte Fachdaten. Erste eigene Entität: Gefährdungsbeurteilungen,
- * die beim Anlegen automatisch per dimension_link an diesen Knoten hängen (Anker-Prinzip).
+ * Betrieb/Abteilung-Detail — Betriebs-Cockpit mit Tab-Navigation (deep-linkable via ?tab=).
+ *
+ * Ein Reiter je Betrieb-Ebenen-Funktion (Anker-Prinzip). Real: Übersicht +
+ * Gefährdungsbeurteilungen. Platzhalter (Klickroute/UX zuerst): Beschäftigte,
+ * Betreuung, Preise, Begehungen — Logik folgt später.
  */
 class Show extends Component
 {
+    /** Tab-Definition: key => [label, icon]. Reihenfolge = Klickroute. */
+    public const TABS = [
+        'overview'     => ['Übersicht',                'heroicon-o-squares-2x2'],
+        'risk'         => ['Gefährdungsbeurteilungen', 'heroicon-o-shield-exclamation'],
+        'staff'        => ['Beschäftigte',             'heroicon-o-users'],
+        'care'         => ['Betreuung',                'heroicon-o-clipboard-document-check'],
+        'pricing'      => ['Preise',                   'heroicon-o-banknotes'],
+        'inspections'  => ['Begehungen',               'heroicon-o-clipboard-document-list'],
+    ];
+
     #[Locked]
     public int $entityId;
+
+    #[Url(as: 'tab', history: true)]
+    public string $tab = 'overview';
 
     public bool $showCreate = false;
     public string $newTitle = '';
@@ -25,6 +41,10 @@ class Show extends Component
     public function mount(int $company): void
     {
         $this->entityId = $this->resolve($company)->id;
+
+        if (!array_key_exists($this->tab, self::TABS)) {
+            $this->tab = 'overview';
+        }
     }
 
     protected function resolve(int $id): OrganizationEntity
@@ -80,6 +100,7 @@ class Show extends Component
             'parent'          => $parent,
             'children'        => $children,
             'riskAssessments' => $riskAssessments,
+            'tabs'            => self::TABS,
         ])->layout('platform::layouts.app');
     }
 }
