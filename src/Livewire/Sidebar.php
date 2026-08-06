@@ -19,13 +19,23 @@ class Sidebar extends Component
         $user = Auth::user();
         $team = $user?->currentTeam?->id;
 
-        $tree = $team ? Companies::tree((int) $team) : [];
+        $nodes = [];
+        if ($team) {
+            foreach (Companies::tree((int) $team) as $n) {
+                $nodes[] = [
+                    'id'    => $n['id'],
+                    'label' => $n['name'],
+                    'depth' => $n['depth'],
+                    'url'   => route('customer.companies.show', $n['id']),
+                ];
+            }
+        }
 
         $route    = request()->route();
         $activeId = $route ? $route->parameter('company') : null;
 
         return view('customer::livewire.sidebar', [
-            'tree'     => $tree,
+            'nodes'    => $nodes,
             'activeId' => $activeId,
         ]);
     }

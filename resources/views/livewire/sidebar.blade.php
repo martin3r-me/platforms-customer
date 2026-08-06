@@ -19,20 +19,7 @@
         </x-ui-sidebar-item>
     </x-ui-sidebar-list>
 
-    @if(!empty($tree))
-        <x-ui-sidebar-list label="Betriebe">
-            @foreach($tree as $node)
-                <x-ui-sidebar-item
-                    :href="route('customer.companies.show', $node['id'])"
-                    :active="(string) $activeId === (string) $node['id']">
-                    <span class="flex items-center gap-2 min-w-0" style="padding-left: {{ ($node['depth'] ?? 0) * 0.75 }}rem">
-                        @svg(($node['depth'] ?? 0) === 0 ? 'heroicon-o-building-office-2' : 'heroicon-o-building-office', 'w-4 h-4 text-[var(--nx-text)] shrink-0')
-                        <span class="text-sm truncate">{{ $node['name'] }}</span>
-                    </span>
-                </x-ui-sidebar-item>
-            @endforeach
-        </x-ui-sidebar-list>
-    @endif
+    <x-ui-tree-nav label="Betriebe" :nodes="$nodes" :activeId="$activeId" />
 
     <div x-show="collapsed" class="px-2 py-2 border-b border-[color:var(--nx-line)]">
         <div class="flex flex-col gap-2">
