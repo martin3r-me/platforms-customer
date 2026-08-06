@@ -6,11 +6,12 @@ use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Platform\Organization\Models\OrganizationEntity;
-use Platform\Customer\Support\Companies;
+use Platform\Customer\Models\RiskAssessment;
 
 /**
- * Betrieb/Abteilung-Detail — Abteilungen (Kinder) + Anlage neuer Abteilungen.
- * Abteilung = customer_department-Entity mit parent_entity_id auf den Betrieb.
+ * Betrieb/Abteilung-Detail — Betriebs-Cockpit. Abteilungen (Kinder, nur lesend)
+ * + Betrieb-verankerte Fachdaten. Erste eigene Entität: Gefährdungsbeurteilungen,
+ * die beim Anlegen automatisch per dimension_link an diesen Knoten hängen (Anker-Prinzip).
  */
 class Show extends Component
 {
@@ -18,7 +19,8 @@ class Show extends Component
     public int $entityId;
 
     public bool $showCreate = false;
-    public string $newDepartmentName = '';
+    public string $newTitle = '';
+    public string $newWorkArea = '';
 
     public function mount(int $company): void
     {
@@ -32,17 +34,21 @@ class Show extends Component
         return OrganizationEntity::query()->forTeam($team)->findOrFail($id);
     }
 
-    public function createDepartment(): void
+    public function createRiskAssessment(): void
     {
-        $name = trim($this->newDepartmentName);
-        if ($name === '') {
+        $title = trim($this->newTitle);
+        if ($title === '') {
             return;
         }
 
-        $user = Auth::user();
-        Companies::createDepartment($name, $this->entityId, (int) $user->currentTeam->id, (int) $user->id);
+        RiskAssessment::create([
+            'organization_entity_id' => $this->entityId,
+            'title'                  => $title,
+            'work_area'              => trim($this->newWorkArea) ?: null,
+            'created_by_user_id'     => Auth::id(),
+        ]);
 
-        $this->newDepartmentName = '';
+        $this->reset(['newTitle', 'newWorkArea']);
         $this->showCreate = false;
     }
 
@@ -63,10 +69,17 @@ class Show extends Component
             ->orderBy('name')
             ->get();
 
+        $riskAssessments = RiskAssessment::query()
+            ->forTeam($team)
+            ->where('organization_entity_id', $entity->id)
+            ->orderByDesc('id')
+            ->get();
+
         return view('customer::livewire.company.show', [
-            'entity'   => $entity,
-            'parent'   => $parent,
-            'children' => $children,
+            'entity'          => $entity,
+            'parent'          => $parent,
+            'children'        => $children,
+            'riskAssessments' => $riskAssessments,
         ])->layout('platform::layouts.app');
     }
 }

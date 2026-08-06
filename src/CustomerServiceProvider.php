@@ -5,9 +5,13 @@ namespace Platform\Customer;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Livewire\Livewire;
 use Platform\Core\PlatformCore;
 use Platform\Core\Routing\ModuleRouter;
+use Platform\Customer\Models\RiskAssessment;
+use Platform\Customer\Models\Hazard;
+use Platform\Customer\Models\Exposure;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
@@ -20,6 +24,12 @@ class CustomerServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Relation::morphMap([
+            'customer_risk_assessment' => RiskAssessment::class,
+            'customer_hazard'          => Hazard::class,
+            'customer_exposure'        => Exposure::class,
+        ]);
+
         if (
             config()->has('customer.routing') &&
             config()->has('customer.navigation') &&
@@ -50,6 +60,21 @@ class CustomerServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'customer');
 
         $this->registerLivewireComponents();
+
+        $this->registerOrganizationIntegration();
+    }
+
+    /**
+     * Registriert den EntityLinkProvider, damit Gefährdungsbeurteilungen am Betrieb-Org-Entity rendern.
+     */
+    protected function registerOrganizationIntegration(): void
+    {
+        try {
+            resolve(\Platform\Organization\Services\EntityLinkRegistry::class)
+                ->register(new \Platform\Customer\Organization\CustomerEntityLinkProvider());
+        } catch (\Throwable $e) {
+            // Organization-Modul nicht verfügbar — ignorieren.
+        }
     }
 
     /**

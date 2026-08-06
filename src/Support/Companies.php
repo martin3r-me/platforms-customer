@@ -56,27 +56,4 @@ class Companies
 
         return $rows;
     }
-
-    public static function createCompany(string $name, int $teamId, ?int $userId): OrganizationEntity
-    {
-        return OrganizationEntity::create([
-            'team_id'        => $teamId,
-            'user_id'        => $userId,
-            'name'           => $name,
-            'entity_type_id' => self::customerTypeId(),
-            'is_active'      => true,
-        ]);
-    }
-
-    public static function createDepartment(string $name, int $parentId, int $teamId, ?int $userId): OrganizationEntity
-    {
-        return OrganizationEntity::create([
-            'team_id'          => $teamId,
-            'user_id'          => $userId,
-            'name'             => $name,
-            'entity_type_id'   => self::departmentTypeId(),
-            'parent_entity_id' => $parentId,
-            'is_active'        => true,
-        ]);
-    }
 }

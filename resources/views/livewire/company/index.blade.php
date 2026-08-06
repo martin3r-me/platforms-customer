@@ -11,12 +11,7 @@
         <x-ui-page-actionbar :breadcrumbs="[
             ['label' => 'Betriebe', 'route' => 'customer.dashboard', 'icon' => 'building-office-2'],
             ['label' => 'Alle Betriebe'],
-        ]">
-            <x-nx-button variant="primary" size="sm" wire:click="$set('showCreate', true)">
-                @svg('heroicon-o-plus', 'w-4 h-4')
-                <span>Neuer Betrieb</span>
-            </x-nx-button>
-        </x-ui-page-actionbar>
+        ]" />
     </x-slot>
 
     <x-ui-page-container width="contained" spacing="space-y-6">
@@ -26,7 +21,8 @@
             @if(empty($rows))
                 <x-nx-card>
                     <x-nx-empty icon="heroicon-o-building-office-2">
-                        Noch keine Betriebe. Lege den ersten über „Neuer Betrieb" an.
+                        Noch keine Betriebe. Markiere im Organization-Modul eine Umwelt-Entität
+                        als „Externer Kunde" — sie erscheint dann automatisch hier.
                     </x-nx-empty>
                 </x-nx-card>
             @else
@@ -46,23 +42,6 @@
             @endif
         </x-nx-section>
     </x-ui-page-container>
-
-    {{-- Anlegen-Modal --}}
-    <x-nx-modal wire:model="showCreate" size="md">
-        <x-slot name="header">Neuer Betrieb</x-slot>
-        <div class="space-y-4">
-            <x-nx-input-text name="newCompanyName" label="Name des Betriebs" wire:model="newCompanyName" required />
-            <p class="text-xs text-[color:var(--nx-muted)]">
-                Wird als Kunde (external_customer) im Organization-Graphen angelegt.
-            </p>
-        </div>
-        <x-slot name="footer">
-            <div class="flex justify-end gap-3">
-                <x-nx-button variant="ghost" wire:click="$set('showCreate', false)">Abbrechen</x-nx-button>
-                <x-nx-button variant="primary" wire:click="createCompany">Anlegen</x-nx-button>
-            </div>
-        </x-slot>
-    </x-nx-modal>
 
     <x-slot name="sidebar">
         <x-ui-page-sidebar title="Übersicht" width="w-80" :defaultOpen="true">
