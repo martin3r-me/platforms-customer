@@ -178,14 +178,36 @@
     </x-nx-modal>
 
     <x-slot name="sidebar">
-        <x-ui-page-sidebar title="Übersicht" width="w-80" :defaultOpen="true">
-            <div class="p-6 space-y-6">
-                <div>
-                    <h3 class="text-xs font-semibold uppercase tracking-wide text-[color:var(--nx-faint)] mb-3">Betrieb</h3>
-                    <div class="text-sm text-[color:var(--nx-text)]">{{ $entity->name }}</div>
-                    <div class="text-sm text-[color:var(--nx-muted)]">{{ $entity->type?->name }}</div>
+        <x-ui-page-sidebar :title="$entity->name" icon="heroicon-o-building-office-2" width="w-64" :defaultOpen="true">
+            <nav class="p-2 space-y-0.5">
+                <a href="{{ route('customer.companies.index') }}" wire:navigate
+                   class="flex items-center gap-2 px-2 py-1.5 text-xs text-[color:var(--nx-muted)] hover:text-[color:var(--nx-text)]">
+                    @svg('heroicon-o-chevron-left', 'w-3.5 h-3.5')
+                    <span>Alle Betriebe</span>
+                </a>
+
+                @if($parent)
+                    <a href="{{ route('customer.companies.show', $parent->id) }}" wire:navigate
+                       class="flex items-center gap-2 px-2 pb-1 text-xs text-[color:var(--nx-faint)] hover:text-[color:var(--nx-text)] truncate">
+                        @svg('heroicon-o-building-office-2', 'w-3.5 h-3.5')
+                        <span class="truncate">{{ $parent->name }}</span>
+                    </a>
+                @endif
+
+                <div class="pt-1">
+                    @foreach($sections as $s)
+                        <a href="{{ route($s['route'], $entity->id) }}" wire:navigate
+                           @class([
+                               'flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition',
+                               'bg-[color:var(--nx-active)] text-[color:var(--nx-text)] font-semibold' => $section === $s['key'],
+                               'text-[color:var(--nx-text)] hover:bg-[color:var(--nx-hover)]' => $section !== $s['key'],
+                           ])>
+                            @svg($s['icon'], 'w-4 h-4')
+                            <span>{{ $s['label'] }}</span>
+                        </a>
+                    @endforeach
                 </div>
-            </div>
+            </nav>
         </x-ui-page-sidebar>
     </x-slot>
 

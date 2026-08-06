@@ -88,6 +88,7 @@ class Show extends Component
             'parent'          => $parent,
             'children'        => $children,
             'riskAssessments' => $riskAssessments,
+            'sections'        => CompanySections::all(),
         ])->layout('platform::layouts.app');
     }
 }
