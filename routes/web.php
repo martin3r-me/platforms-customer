@@ -25,3 +25,11 @@ Route::get('/companies/{company}/preise', CompanyShow::class)->name('customer.co
 Route::get('/companies/{company}/begehungen', CompanyShow::class)->name('customer.companies.inspections');
 
 Route::get('/risk-assessments/{riskAssessment}', RiskAssessmentShow::class)->name('customer.risk-assessments.show');
+
+Route::get('/risk-assessments/{riskAssessment}/print', function (int $riskAssessment) {
+    $team = (int) auth()->user()->currentTeam->id;
+    $a = \Platform\Customer\Models\RiskAssessment::query()->forTeam($team)
+        ->with(['organizationEntity', 'hazards.catalog'])->findOrFail($riskAssessment);
+
+    return view('customer::print.risk-assessment', ['a' => $a]);
+})->name('customer.risk-assessments.print');

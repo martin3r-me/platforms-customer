@@ -14,7 +14,25 @@
                 ? ['label' => $assessment->organizationEntity->name, 'route' => 'customer.companies.show', 'params' => [$assessment->organizationEntity->id]]
                 : null,
             ['label' => $assessment->title ?? 'Gefährdungsbeurteilung'],
-        ]))" />
+        ]))">
+            <x-nx-button variant="secondary" size="sm" :href="route('customer.risk-assessments.print', $assessment->id)" target="_blank">
+                @svg('heroicon-o-printer', 'w-4 h-4')
+                <span>Drucken / PDF</span>
+            </x-nx-button>
+            @if($assessment->isClosed())
+                <x-nx-button variant="secondary" size="sm" wire:click="reopen"
+                             wire:confirm="Zur Überarbeitung öffnen? Legt eine neue Version an.">
+                    @svg('heroicon-o-lock-open', 'w-4 h-4')
+                    <span>Zur Überarbeitung</span>
+                </x-nx-button>
+            @else
+                <x-nx-button variant="primary" size="sm" wire:click="close"
+                             wire:confirm="Gefährdungsbeurteilung abschließen? Danach revisionssicher (read-only).">
+                    @svg('heroicon-o-lock-closed', 'w-4 h-4')
+                    <span>Abschließen</span>
+                </x-nx-button>
+            @endif
+        </x-ui-page-actionbar>
     </x-slot>
 
     <x-ui-page-container width="contained" spacing="space-y-6">
@@ -25,6 +43,12 @@
                     <div class="text-sm font-medium text-[color:var(--nx-text)]">{{ $assessment->title ?? 'Ohne Titel' }}</div>
                     @if($assessment->status)
                         <x-nx-badge dot>{{ $assessment->status->label() }}</x-nx-badge>
+                    @endif
+                    <span class="text-xs text-[color:var(--nx-faint)]">Version {{ $assessment->version ?? 1 }}</span>
+                    @if($assessment->isClosed())
+                        <span class="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-full bg-[color:var(--nx-active)] text-[color:var(--nx-text)]">
+                            @svg('heroicon-o-lock-closed', 'w-3 h-3') Abgeschlossen {{ $assessment->closed_at?->format('d.m.Y') }} · revisionssicher
+                        </span>
                     @endif
                 </div>
                 <dl class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
@@ -75,12 +99,16 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-2 shrink-0">
-                                <button type="button" wire:click="cycleStatus({{ $hazard->id }})"
-                                        class="text-xs px-2 py-1 rounded-md border border-[color:var(--nx-line)] hover:bg-[color:var(--nx-hover)] text-[color:var(--nx-text)]">
-                                    {{ $hazard->status?->label() }}
-                                </button>
-                                <button type="button" wire:click="removeHazard({{ $hazard->id }})" wire:confirm="Gefährdung entfernen?"
-                                        class="text-xs text-[color:var(--nx-faint)] hover:text-[color:var(--nx-danger)]">Entfernen</button>
+                                @if($assessment->isClosed())
+                                    <span class="text-xs text-[color:var(--nx-muted)]">{{ $hazard->status?->label() }}</span>
+                                @else
+                                    <button type="button" wire:click="cycleStatus({{ $hazard->id }})"
+                                            class="text-xs px-2 py-1 rounded-md border border-[color:var(--nx-line)] hover:bg-[color:var(--nx-hover)] text-[color:var(--nx-text)]">
+                                        {{ $hazard->status?->label() }}
+                                    </button>
+                                    <button type="button" wire:click="removeHazard({{ $hazard->id }})" wire:confirm="Gefährdung entfernen?"
+                                            class="text-xs text-[color:var(--nx-faint)] hover:text-[color:var(--nx-danger)]">Entfernen</button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -88,6 +116,7 @@
                     <div class="px-4 py-4 text-sm text-[color:var(--nx-muted)]">Noch keine Gefährdung erfasst.</div>
                 @endforelse
 
+                @if(!$assessment->isClosed())
                 {{-- Gefährdung erfassen --}}
                 @php
                     $p = (int) ($newHazard['probability'] ?? 0);
@@ -151,6 +180,7 @@
                         </x-nx-button>
                     </div>
                 </div>
+                @endif
             </x-nx-card>
         </x-nx-section>
     </x-ui-page-container>

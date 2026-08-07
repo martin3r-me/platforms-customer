@@ -65,11 +65,16 @@ class HazardCatalog
                 'Einseitige / repetitive Belastung',
                 'Zwangshaltung',
             ],
+            // Psychische Belastung — 5 GDA-Merkmalsbereiche (verpflichtend seit 2013).
             HazardCategory::MentalStrain->value => [
-                'Hohes Arbeitspensum / Zeitdruck',
-                'Geringer Handlungsspielraum',
-                'Soziale Konflikte / Mobbing',
-                'Ungünstige Arbeitszeiten (Nacht / Schicht)',
+                'Arbeitsinhalt: hohes Pensum / Über- oder Unterforderung',
+                'Arbeitsinhalt: geringer Handlungs-/Entscheidungsspielraum',
+                'Arbeitsorganisation: Zeit-/Termindruck, häufige Unterbrechungen',
+                'Arbeitsorganisation: ungünstige Arbeitszeiten (Nacht / Schicht)',
+                'Soziale Beziehungen: Konflikte / Mobbing, fehlende Unterstützung',
+                'Soziale Beziehungen: mangelndes Feedback / Führungsqualität',
+                'Arbeitsumgebung: Lärm / Klima / räumliche Enge (psych. wirksam)',
+                'Neue Arbeitsformen: mobiles Arbeiten / ständige Erreichbarkeit',
             ],
             HazardCategory::Other->value => [
                 'Gefährdung durch Menschen (Überfall)',

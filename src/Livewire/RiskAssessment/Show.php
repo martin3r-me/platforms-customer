@@ -62,6 +62,9 @@ class Show extends Component
         ])['newHazard'];
 
         $assessment = $this->resolve($this->assessmentId);
+        if ($assessment->isClosed()) {
+            return;
+        }
 
         // occasion_id kann ID ODER Titel sein (Select-Rendering) — robust zur ID auflösen.
         $occasionId = $data['occasion_id'] ?: null;
@@ -102,6 +105,9 @@ class Show extends Component
 
     public function removeHazard(int $hazardId): void
     {
+        if ($this->resolve($this->assessmentId)->isClosed()) {
+            return;
+        }
         $team = (int) Auth::user()->currentTeam->id;
         Hazard::query()->forTeam($team)
             ->where('risk_assessment_id', $this->assessmentId)
@@ -111,6 +117,9 @@ class Show extends Component
     /** Status weiterschalten: offen → in Umsetzung → erledigt → offen. */
     public function cycleStatus(int $hazardId): void
     {
+        if ($this->resolve($this->assessmentId)->isClosed()) {
+            return;
+        }
         $team = (int) Auth::user()->currentTeam->id;
         $hazard = Hazard::query()->forTeam($team)
             ->where('risk_assessment_id', $this->assessmentId)
@@ -126,6 +135,67 @@ class Show extends Component
             default                  => HazardStatus::Open,
         };
         $hazard->save();
+    }
+
+    /** Abschließen — friert den Stand ein (§6) und macht die GBU revisionssicher (read-only). */
+    public function close(): void
+    {
+        $a = $this->resolve($this->assessmentId);
+        if ($a->isClosed()) {
+            return;
+        }
+        $a->content   = $this->buildSnapshot($a);
+        $a->closed_at = now();
+        $a->status    = \Platform\Customer\Enums\AssessmentStatus::Active->value;
+        $a->save();
+
+        $this->dispatch('toast', message: 'Gefährdungsbeurteilung abgeschlossen (revisionssicher).', type: 'success');
+    }
+
+    /** Zur Überarbeitung öffnen — neue Version, wieder editierbar. */
+    public function reopen(): void
+    {
+        $a = $this->resolve($this->assessmentId);
+        if (!$a->isClosed()) {
+            return;
+        }
+        $a->closed_at = null;
+        $a->status    = \Platform\Customer\Enums\AssessmentStatus::Revision->value;
+        $a->version   = (int) $a->version + 1;
+        $a->save();
+
+        $this->dispatch('toast', message: 'Zur Überarbeitung geöffnet — Version ' . $a->version . '.', type: 'success');
+    }
+
+    /** Eingefrorener Snapshot des aktuellen Stands (Dokumentation nach §6). */
+    protected function buildSnapshot(RiskAssessment $a): array
+    {
+        $a->loadMissing(['hazards.catalog', 'organizationEntity']);
+
+        return [
+            'title'       => $a->title,
+            'work_area'   => $a->work_area,
+            'betrieb'     => $a->organizationEntity?->name,
+            'assessed_on' => optional($a->assessed_on)->toDateString(),
+            'closed_on'   => now()->toDateString(),
+            'version'     => (int) $a->version,
+            'hazards'     => $a->hazards->map(function ($h) {
+                $meta = $h->riskMeta();
+                return [
+                    'category'     => $h->category?->label(),
+                    'description'  => $h->description,
+                    'risk'         => $meta['label'] ?? null,
+                    'rpz'          => $meta['rpz'] ?? null,
+                    'measure_type' => $h->measure_type?->label(),
+                    'measures'     => $h->measures,
+                    'responsible'  => $h->responsible,
+                    'deadline'     => optional($h->deadline)->toDateString(),
+                    'status'       => $h->status?->label(),
+                    'vorsorge'     => $h->catalog?->title,
+                    'care_type'    => $h->careTypeLabel(),
+                ];
+            })->all(),
+        ];
     }
 
     public function render()

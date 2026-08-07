@@ -31,6 +31,9 @@ class RiskAssessment extends Model
         'assessed_on',
         'next_review',
         'status',
+        'version',
+        'closed_at',
+        'content',
         'created_by_user_id',
     ];
 
@@ -38,7 +41,15 @@ class RiskAssessment extends Model
         'assessed_on' => 'date',
         'next_review' => 'date',
         'status'      => AssessmentStatus::class,
+        'closed_at'   => 'datetime',
+        'content'     => 'array',
     ];
+
+    /** Abgeschlossen = revisionssicher, read-only. */
+    public function isClosed(): bool
+    {
+        return $this->closed_at !== null;
+    }
 
     protected static function booted(): void
     {
