@@ -41,6 +41,7 @@ class CustomerServiceProvider extends ServiceProvider
             PlatformCore::registerModule([
                 'key'        => 'customer',
                 'title'      => 'Kundenbetriebe',
+                'group'      => 'praxis_admin',
                 'routing'    => config('customer.routing'),
                 'guard'      => config('customer.guard'),
                 'navigation' => config('customer.navigation'),
