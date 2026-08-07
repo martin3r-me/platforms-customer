@@ -67,8 +67,16 @@
                                 @svg('heroicon-o-link', 'w-3 h-3') Quelle: CRM (am Knoten verknüpft)
                             </div>
                         @else
-                            <div class="text-xs text-[color:var(--nx-faint)] border-t border-[color:var(--nx-line)] pt-3">
-                                Keine CRM-Firma verknüpft. Stammdaten & Kontakt erscheinen hier, sobald der Betrieb im CRM gepflegt und am Knoten verknüpft ist.
+                            <div class="border-t border-[color:var(--nx-line)] pt-3 space-y-2">
+                                <div class="text-xs text-[color:var(--nx-faint)]">
+                                    Keine CRM-Firma verknüpft. Stammdaten & Kontakt erscheinen hier, sobald der Betrieb im CRM gepflegt und am Knoten verknüpft ist.
+                                </div>
+                                @if($crmDirectoryAvailable)
+                                    <x-nx-button variant="secondary" size="sm" wire:click="openCrmLink">
+                                        @svg('heroicon-o-link', 'w-4 h-4')
+                                        <span>Mit CRM verknüpfen</span>
+                                    </x-nx-button>
+                                @endif
                             </div>
                         @endif
                     </div>
@@ -273,4 +281,45 @@
             </div>
         </x-ui-page-sidebar>
     </x-slot>
+
+    {{-- Mit CRM verknüpfen (Firma anlegen oder bestehende wählen → dimension_link am Knoten) --}}
+    <x-nx-modal wire:model="showCrmLink" size="md">
+        <x-slot name="header">Mit CRM verknüpfen</x-slot>
+        <div class="space-y-5">
+            {{-- Neue Firma anlegen --}}
+            <div class="space-y-2">
+                <div class="text-xs font-semibold uppercase tracking-wide text-[color:var(--nx-faint)]">Neue CRM-Firma anlegen</div>
+                <x-nx-input-text name="crmNewName" label="Name" wire:model="crmNewName" />
+                <x-nx-button variant="primary" size="sm" wire:click="createAndLinkCrm">
+                    @svg('heroicon-o-plus', 'w-4 h-4') <span>Anlegen &amp; verknüpfen</span>
+                </x-nx-button>
+            </div>
+
+            {{-- Bestehende suchen --}}
+            <div class="space-y-2 border-t border-[color:var(--nx-line)] pt-4">
+                <div class="text-xs font-semibold uppercase tracking-wide text-[color:var(--nx-faint)]">Bestehende Firma verknüpfen</div>
+                <div class="flex gap-2">
+                    <x-nx-input-text name="crmSearch" label="" wire:model="crmSearch" placeholder="Firma suchen…" wire:keydown.enter="searchCrm" />
+                    <x-nx-button variant="secondary" size="sm" wire:click="searchCrm">Suchen</x-nx-button>
+                </div>
+                @if(!empty($crmResults))
+                    <div class="divide-y divide-[color:var(--nx-line)] border border-[color:var(--nx-line)] rounded-md">
+                        @foreach($crmResults as $r)
+                            <button type="button" wire:click="linkExistingCrm({{ $r['id'] }})"
+                                    class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-[color:var(--nx-hover)]">
+                                <span class="min-w-0">
+                                    <span class="block truncate text-sm text-[color:var(--nx-text)]">{{ $r['label'] }}</span>
+                                    @if($r['subtitle'])<span class="block truncate text-xs text-[color:var(--nx-muted)]">{{ $r['subtitle'] }}</span>@endif
+                                </span>
+                                @svg('heroicon-o-link', 'w-4 h-4 text-[color:var(--nx-faint)] shrink-0')
+                            </button>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        </div>
+        <x-slot name="footer">
+            <x-nx-button variant="ghost" wire:click="$set('showCrmLink', false)">Schließen</x-nx-button>
+        </x-slot>
+    </x-nx-modal>
 </x-ui-page>

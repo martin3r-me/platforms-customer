@@ -11,7 +11,12 @@
         <x-ui-page-actionbar :breadcrumbs="[
             ['label' => 'Kundenbetriebe', 'route' => 'customer.dashboard', 'icon' => 'building-office-2'],
             ['label' => 'Alle Betriebe'],
-        ]" />
+        ]">
+            <x-nx-button variant="primary" size="sm" wire:click="$set('showCreate', true)">
+                @svg('heroicon-o-plus', 'w-4 h-4')
+                <span>Neuer Betrieb</span>
+            </x-nx-button>
+        </x-ui-page-actionbar>
     </x-slot>
 
     <x-ui-page-container width="contained" spacing="space-y-6">
@@ -64,4 +69,17 @@
             </div>
         </x-ui-page-sidebar>
     </x-slot>
+
+    {{-- Neuer Betrieb (Onboarding → external_customer-Knoten) --}}
+    <x-nx-modal wire:model="showCreate" size="md">
+        <x-slot name="header">Neuer Betrieb</x-slot>
+        <div class="space-y-3">
+            <x-nx-input-text name="newCompany.name" label="Name des Betriebs" wire:model="newCompany.name" placeholder="z.B. Nordmetall AG" />
+            <p class="text-xs text-[color:var(--nx-faint)]">Legt den Betrieb als Knoten im Org-Graphen an (Typ „Externer Kunde"). CRM-Stammdaten & Fachdaten hängst du danach lose dran.</p>
+        </div>
+        <x-slot name="footer">
+            <x-nx-button variant="ghost" wire:click="$set('showCreate', false)">Abbrechen</x-nx-button>
+            <x-nx-button variant="primary" wire:click="createCompany">Anlegen</x-nx-button>
+        </x-slot>
+    </x-nx-modal>
 </x-ui-page>

@@ -23,6 +23,7 @@ class CustomerServiceProvider extends ServiceProvider
 
         // Registry, in die Fachmodule ihre Betrieb→Patienten-Provider eintragen.
         $this->app->singleton(\Platform\Customer\Services\CompanyPatientRegistry::class);
+        $this->app->singleton(\Platform\Customer\Services\CompanyDirectoryRegistry::class);
     }
 
     public function boot(): void

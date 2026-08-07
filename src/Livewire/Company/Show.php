@@ -29,6 +29,60 @@ class Show extends Component
     public string $newTitle = '';
     public string $newWorkArea = '';
 
+    // CRM-Verknüpfung (Steckbrief)
+    public bool $showCrmLink = false;
+    public string $crmSearch = '';
+    public array $crmResults = [];
+    public string $crmNewName = '';
+
+    public function openCrmLink(): void
+    {
+        $this->crmNewName = $this->resolve($this->entityId)->name ?? '';
+        $this->crmSearch = '';
+        $this->crmResults = [];
+        $this->showCrmLink = true;
+    }
+
+    public function searchCrm(): void
+    {
+        $provider = resolve(\Platform\Customer\Services\CompanyDirectoryRegistry::class)->provider();
+        $this->crmResults = $provider
+            ? $provider->search((int) Auth::user()->currentTeam->id, $this->crmSearch)
+            : [];
+    }
+
+    /** Bestehende CRM-Firma am Knoten verknüpfen. */
+    public function linkExistingCrm(int $companyId): void
+    {
+        $this->attachCrm($companyId);
+    }
+
+    /** Neue CRM-Firma anlegen (Name vom Knoten) und verknüpfen. */
+    public function createAndLinkCrm(): void
+    {
+        $provider = resolve(\Platform\Customer\Services\CompanyDirectoryRegistry::class)->provider();
+        if (!$provider || trim($this->crmNewName) === '') {
+            return;
+        }
+        $id = $provider->createCompany((int) Auth::user()->currentTeam->id, trim($this->crmNewName));
+        if ($id) {
+            $this->attachCrm($id);
+        }
+    }
+
+    protected function attachCrm(int $companyId): void
+    {
+        \Platform\Customer\Support\OrganizationLink::sync(
+            'crm_company',
+            $companyId,
+            $this->entityId,
+            (int) Auth::user()->currentTeam->id,
+            Auth::id(),
+        );
+        $this->showCrmLink = false;
+        $this->dispatch('toast', message: 'Mit CRM verknüpft.', type: 'success');
+    }
+
     public function mount(int $company): void
     {
         $this->entityId = $this->resolve($company)->id;
@@ -100,6 +154,7 @@ class Show extends Component
             'patients'        => $patients,
             'sections'        => CompanySections::all(),
             'crmProfile'      => \Platform\Customer\Support\CompanyProfile::crmForEntity($this->entityId),
+            'crmDirectoryAvailable' => resolve(\Platform\Customer\Services\CompanyDirectoryRegistry::class)->available(),
         ])->layout('platform::layouts.app');
     }
 }
