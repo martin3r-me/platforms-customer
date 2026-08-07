@@ -9,7 +9,7 @@
 
     <x-slot name="actionbar">
         <x-ui-page-actionbar :breadcrumbs="array_values(array_filter([
-            ['label' => 'Betriebe', 'route' => 'customer.companies.index', 'icon' => 'building-office-2'],
+            ['label' => 'Kundenbetriebe', 'route' => 'customer.companies.index', 'icon' => 'building-office-2'],
             $assessment->organizationEntity
                 ? ['label' => $assessment->organizationEntity->name, 'route' => 'customer.companies.show', 'params' => [$assessment->organizationEntity->id]]
                 : null,

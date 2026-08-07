@@ -23,7 +23,7 @@ return [
 
     'sidebar' => [
         [
-            'group' => 'Betriebe',
+            'group' => 'Kundenbetriebe',
             'items' => [
                 [
                     'label' => 'Dashboard',

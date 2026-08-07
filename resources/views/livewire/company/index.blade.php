@@ -4,12 +4,12 @@
 
 <x-ui-page>
     <x-slot name="navbar">
-        <x-ui-page-navbar title="Betriebe" />
+        <x-ui-page-navbar title="Kundenbetriebe" />
     </x-slot>
 
     <x-slot name="actionbar">
         <x-ui-page-actionbar :breadcrumbs="[
-            ['label' => 'Betriebe', 'route' => 'customer.dashboard', 'icon' => 'building-office-2'],
+            ['label' => 'Kundenbetriebe', 'route' => 'customer.dashboard', 'icon' => 'building-office-2'],
             ['label' => 'Alle Betriebe'],
         ]" />
     </x-slot>

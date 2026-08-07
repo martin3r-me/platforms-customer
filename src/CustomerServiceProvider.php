@@ -40,7 +40,7 @@ class CustomerServiceProvider extends ServiceProvider
         ) {
             PlatformCore::registerModule([
                 'key'        => 'customer',
-                'title'      => 'Betriebe',
+                'title'      => 'Kundenbetriebe',
                 'routing'    => config('customer.routing'),
                 'guard'      => config('customer.guard'),
                 'navigation' => config('customer.navigation'),

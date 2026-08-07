@@ -5,12 +5,12 @@
 
 <x-ui-page>
     <x-slot name="navbar">
-        <x-ui-page-navbar title="Betriebe" />
+        <x-ui-page-navbar title="Kundenbetriebe" />
     </x-slot>
 
     <x-slot name="actionbar">
         <x-ui-page-actionbar :breadcrumbs="[
-            ['label' => 'Betriebe', 'icon' => 'building-office-2'],
+            ['label' => 'Kundenbetriebe', 'icon' => 'building-office-2'],
         ]">
             <x-nx-button variant="primary" size="sm" :href="route('customer.companies.index')" wire:navigate>
                 @svg('heroicon-o-building-office-2', 'w-4 h-4')
@@ -21,7 +21,7 @@
 
     <x-ui-page-container width="contained" spacing="space-y-6">
         <p class="text-sm text-[color:var(--nx-muted)]">
-            Deine Kundenbetriebe — Firmen mit Abteilungen/Standorten, die betreuten Arbeitgeber. Die betriebsärztliche Sicht je Person liegt im Modul <em>Betriebsmedizin</em>.
+            Deine Kundenbetriebe — Firmen mit Abteilungen/Standorten, die betreuten Arbeitgeber. Die betriebsärztliche Sicht je Person liegt im Modul <em>Arbeitsmedizin</em>.
         </p>
 
         <x-nx-stat-grid :cols="2">

@@ -11,7 +11,7 @@
 
     <x-slot name="actionbar">
         <x-ui-page-actionbar :breadcrumbs="array_values(array_filter([
-            ['label' => 'Betriebe', 'route' => 'customer.companies.index', 'icon' => 'building-office-2'],
+            ['label' => 'Kundenbetriebe', 'route' => 'customer.companies.index', 'icon' => 'building-office-2'],
             $parent ? ['label' => $parent->name, 'route' => 'customer.companies.show', 'params' => [$parent->id]] : null,
             ['label' => $entity->name],
         ]))">
@@ -118,7 +118,7 @@
                 @if(empty($patients))
                     <x-nx-card>
                         <x-nx-empty icon="heroicon-o-user-group">
-                            Keine Patienten an diesem Betrieb. Beschäftigte werden im Betriebsmedizin-Modul angelegt.
+                            Keine Patienten an diesem Betrieb. Beschäftigte werden im Arbeitsmedizin-Modul angelegt.
                         </x-nx-empty>
                     </x-nx-card>
                 @else
