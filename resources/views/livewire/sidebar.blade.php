@@ -5,7 +5,7 @@
 
 <div>
     <div x-show="!collapsed" class="p-3 text-sm italic text-[var(--nx-text)] uppercase border-b border-[color:var(--nx-line)] mb-2">
-        Betriebe
+        Kundenbetriebe
     </div>
 
     <x-ui-sidebar-list>
