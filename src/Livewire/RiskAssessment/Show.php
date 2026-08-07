@@ -57,13 +57,21 @@ class Show extends Component
             'newHazard.measures'     => ['nullable', 'string', 'max:2000'],
             'newHazard.responsible'  => ['nullable', 'string', 'max:191'],
             'newHazard.deadline'     => ['nullable', 'date'],
-            'newHazard.occasion_id'  => ['nullable', 'integer'],
+            'newHazard.occasion_id'  => ['nullable', 'string', 'max:255'],
             'newHazard.care_type'    => ['nullable', 'string', 'in:mandatory,offered,request,follow_up'],
         ])['newHazard'];
 
         $assessment = $this->resolve($this->assessmentId);
 
+        // occasion_id kann ID ODER Titel sein (Select-Rendering) — robust zur ID auflösen.
         $occasionId = $data['occasion_id'] ?: null;
+        if ($occasionId !== null && !ctype_digit((string) $occasionId)
+            && class_exists(\Platform\Arbmedvv\Models\Occasion::class)) {
+            $occasionId = \Platform\Arbmedvv\Models\Occasion::query()
+                ->where('team_id', (int) $assessment->team_id)
+                ->where('title', $occasionId)->value('id');
+        }
+        $occasionId = $occasionId ? (int) $occasionId : null;
 
         Hazard::create([
             'team_id'            => (int) $assessment->team_id,
