@@ -40,6 +40,7 @@ class Hazard extends Model
         'effective',
         'catalog_type',
         'catalog_id',
+        'care_type',
     ];
 
     protected $casts = [
@@ -91,6 +92,18 @@ class Hazard extends Model
             $rpz <= 4  => HazardRisk::Low,
             $rpz <= 12 => HazardRisk::Medium,
             default    => HazardRisk::High,
+        };
+    }
+
+    /** Label der abgeleiteten Vorsorgeart (lokal, ohne occupational-Abhängigkeit). */
+    public function careTypeLabel(): ?string
+    {
+        return match ($this->care_type) {
+            'mandatory' => 'Pflichtvorsorge',
+            'offered'   => 'Angebotsvorsorge',
+            'request'   => 'Wunschvorsorge',
+            'follow_up' => 'Nachgehende Vorsorge',
+            default     => null,
         };
     }
 

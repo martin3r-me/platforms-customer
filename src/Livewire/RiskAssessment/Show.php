@@ -30,6 +30,8 @@ class Show extends Component
         'measures'     => '',
         'responsible'  => '',
         'deadline'     => null,
+        'occasion_id'  => '',   // arbmedvv-Anlass (empfohlene Vorsorge)
+        'care_type'    => '',   // Pflicht/Angebot/Wunsch
     ];
 
     public function mount(int $riskAssessment): void
@@ -55,9 +57,13 @@ class Show extends Component
             'newHazard.measures'     => ['nullable', 'string', 'max:2000'],
             'newHazard.responsible'  => ['nullable', 'string', 'max:191'],
             'newHazard.deadline'     => ['nullable', 'date'],
+            'newHazard.occasion_id'  => ['nullable', 'integer'],
+            'newHazard.care_type'    => ['nullable', 'string', 'in:mandatory,offered,request,follow_up'],
         ])['newHazard'];
 
         $assessment = $this->resolve($this->assessmentId);
+
+        $occasionId = $data['occasion_id'] ?: null;
 
         Hazard::create([
             'team_id'            => (int) $assessment->team_id,
@@ -71,12 +77,17 @@ class Show extends Component
             'responsible'        => $data['responsible'] ?: null,
             'deadline'           => $data['deadline'] ?: null,
             'status'             => HazardStatus::Open->value,
+            // GBU→Vorsorge-Brücke: empfohlener Anlass (arbmedvv) + Art
+            'catalog_type'       => $occasionId ? 'arbmedvv_occasion' : null,
+            'catalog_id'         => $occasionId,
+            'care_type'          => $occasionId ? ($data['care_type'] ?: 'mandatory') : null,
         ]);
 
         $this->newHazard['description'] = '';
         $this->newHazard['measures'] = '';
         $this->newHazard['responsible'] = '';
         $this->newHazard['deadline'] = null;
+        $this->newHazard['occasion_id'] = '';
 
         $this->dispatch('toast', message: 'Gefährdung erfasst.', type: 'success');
     }
@@ -111,13 +122,25 @@ class Show extends Component
 
     public function render()
     {
+        $team = (int) Auth::user()->currentTeam->id;
+
         $assessment = $this->resolve($this->assessmentId)
-            ->load(['organizationEntity', 'hazards']);
+            ->load(['organizationEntity', 'hazards.catalog']);
+
+        // Anlass-Katalog (arbmedvv) guarded — customer bleibt ohne harte Abhängigkeit.
+        $occasionOptions = ['' => '— keine —'];
+        if (class_exists(\Platform\Arbmedvv\Models\Occasion::class)) {
+            foreach (\Platform\Arbmedvv\Models\Occasion::query()->where('team_id', $team)->orderBy('title')->get() as $o) {
+                $occasionOptions[$o->id] = $o->title;
+            }
+        }
 
         return view('customer::livewire.risk-assessment.show', [
             'assessment'      => $assessment,
             'categoryOptions' => collect(HazardCategory::cases())->mapWithKeys(fn ($c) => [$c->value => $c->label()])->all(),
             'measureOptions'  => collect(MeasureType::cases())->mapWithKeys(fn ($m) => [$m->value => $m->short() . ' · ' . $m->label()])->all(),
+            'careTypeOptions' => ['' => '—', 'mandatory' => 'Pflichtvorsorge', 'offered' => 'Angebotsvorsorge', 'request' => 'Wunschvorsorge', 'follow_up' => 'Nachgehende Vorsorge'],
+            'occasionOptions' => $occasionOptions,
             'catalog'         => HazardCatalog::all(),
         ])->layout('platform::layouts.app');
     }

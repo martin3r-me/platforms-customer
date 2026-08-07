@@ -63,6 +63,12 @@
                                 @if($hazard->measures)
                                     <div class="mt-1 text-sm text-[color:var(--nx-muted)]">Maßnahme: {{ $hazard->measures }}</div>
                                 @endif
+                                @if($hazard->catalog)
+                                    <div class="mt-1 inline-flex items-center gap-1 text-xs text-[color:var(--nx-accent)]">
+                                        @svg('heroicon-o-shield-check', 'w-3.5 h-3.5')
+                                        Vorsorge: {{ $hazard->catalog->title ?? 'Anlass' }}@if($hazard->careTypeLabel()) · {{ $hazard->careTypeLabel() }}@endif
+                                    </div>
+                                @endif
                                 <div class="mt-1 flex items-center gap-3 text-xs text-[color:var(--nx-faint)]">
                                     @if($hazard->responsible)<span>Verantwortlich: {{ $hazard->responsible }}</span>@endif
                                     @if($hazard->deadline)<span>Frist: {{ $hazard->deadline->format('d.m.Y') }}</span>@endif
@@ -126,6 +132,16 @@
                         <x-nx-input-text name="newHazard.responsible" label="Verantwortlich" wire:model="newHazard.responsible" />
                         <div class="sm:col-span-2"><x-nx-input-text name="newHazard.measures" label="Maßnahme" wire:model="newHazard.measures" placeholder="konkrete Schutzmaßnahme…" /></div>
                         <x-nx-input-text name="newHazard.deadline" type="date" label="Frist" wire:model="newHazard.deadline" />
+                    </div>
+
+                    {{-- Empfohlene Vorsorge (Brücke zur Arbeitsmedizin) --}}
+                    <div class="pt-2 border-t border-[color:var(--nx-line)]">
+                        <div class="text-xs font-semibold uppercase tracking-wide text-[color:var(--nx-faint)] mb-2">Empfohlene Vorsorge (arbmedvv)</div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <x-nx-input-select name="newHazard.occasion_id" label="Vorsorgeanlass" wire:model="newHazard.occasion_id" :options="$occasionOptions" />
+                            <x-nx-input-select name="newHazard.care_type" label="Vorsorgeart" wire:model="newHazard.care_type" :options="$careTypeOptions" />
+                        </div>
+                        <p class="mt-1 text-xs text-[color:var(--nx-faint)]">Wird in der Arbeitsmedizin je Beschäftigtem als Vorsorge abgeleitet (erscheint dann in der Akte).</p>
                     </div>
 
                     <div>
