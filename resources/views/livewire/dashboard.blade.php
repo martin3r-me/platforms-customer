@@ -20,6 +20,10 @@
     </x-slot>
 
     <x-ui-page-container width="contained" spacing="space-y-6">
+        <p class="text-sm text-[color:var(--nx-muted)]">
+            Deine Kundenbetriebe — Firmen mit Abteilungen/Standorten, die betreuten Arbeitgeber. Die betriebsärztliche Sicht je Person liegt im Modul <em>Betriebsmedizin</em>.
+        </p>
+
         <x-nx-stat-grid :cols="2">
             <a href="{{ route('customer.companies.index') }}" wire:navigate>
                 <x-nx-stat label="Betriebe" :value="$stats['companies']" icon="heroicon-o-building-office-2" hint="Kunden" />
@@ -46,7 +50,7 @@
             <div class="p-6 space-y-6">
                 <div>
                     <h3 class="text-xs font-semibold uppercase tracking-wide text-[color:var(--nx-faint)] mb-3">Betriebe</h3>
-                    <div class="text-sm text-[color:var(--nx-muted)]">Kunden + Abteilungen aus dem Graphen.</div>
+                    <div class="text-sm text-[color:var(--nx-muted)]">Wähle links einen Betrieb — oder öffne die Betriebe-Liste.</div>
                 </div>
             </div>
         </x-ui-page-sidebar>
