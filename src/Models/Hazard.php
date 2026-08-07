@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 use Platform\Customer\Enums\HazardCategory;
 use Platform\Customer\Enums\HazardRisk;
 use Platform\Customer\Enums\HazardStatus;
+use Platform\Customer\Enums\MeasureType;
 
 /**
  * Hazard — einzelne Gefährdung einer Beurteilung.
@@ -28,7 +29,10 @@ class Hazard extends Model
         'category',
         'description',
         'risk',
+        'probability',
+        'severity',
         'measures',
+        'measure_type',
         'responsible',
         'deadline',
         'status',
@@ -41,6 +45,9 @@ class Hazard extends Model
     protected $casts = [
         'category'                 => HazardCategory::class,
         'risk'                     => HazardRisk::class,
+        'probability'              => 'integer',
+        'severity'                 => 'integer',
+        'measure_type'             => MeasureType::class,
         'status'                   => HazardStatus::class,
         'deadline'                 => 'date',
         'effectiveness_checked_at' => 'date',
@@ -54,6 +61,59 @@ class Hazard extends Model
                 $model->team_id = auth()->user()->currentTeam?->id;
             }
         });
+
+        // Ampel/Risikoklasse aus der Matrix ableiten (Nohl 5×5 → Gering/Mittel/Hoch).
+        static::saving(function (self $model) {
+            $class = $model->riskClassFromMatrix();
+            if ($class) {
+                $model->risk = $class->value;
+            }
+        });
+    }
+
+    /** Risikoprioritätszahl (RPZ) = Wahrscheinlichkeit × Schwere (1..25), sonst null. */
+    public function riskPriorityNumber(): ?int
+    {
+        return ($this->probability && $this->severity)
+            ? (int) $this->probability * (int) $this->severity
+            : null;
+    }
+
+    /** Ampel-Klasse aus der Matrix: 1–4 gering · 5–12 mittel · 13–25 hoch. */
+    public function riskClassFromMatrix(): ?HazardRisk
+    {
+        $rpz = $this->riskPriorityNumber();
+        if ($rpz === null) {
+            return null;
+        }
+
+        return match (true) {
+            $rpz <= 4  => HazardRisk::Low,
+            $rpz <= 12 => HazardRisk::Medium,
+            default    => HazardRisk::High,
+        };
+    }
+
+    /** Anzeige-Meta für die Ampel: Klasse, Label, Farbe (hex), RPZ. */
+    public function riskMeta(): ?array
+    {
+        $class = $this->riskClassFromMatrix() ?? $this->risk;
+        if (!$class) {
+            return null;
+        }
+
+        $color = match ($class) {
+            HazardRisk::Low    => '#16a34a',
+            HazardRisk::Medium => '#d97706',
+            HazardRisk::High   => '#dc2626',
+        };
+
+        return [
+            'class' => $class->value,
+            'label' => $class->label(),
+            'color' => $color,
+            'rpz'   => $this->riskPriorityNumber(),
+        ];
     }
 
     public function scopeForTeam(Builder $query, int $teamId): Builder
