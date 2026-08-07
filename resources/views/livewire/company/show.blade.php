@@ -39,11 +39,39 @@
         {{-- ═══ Übersicht ═══ --}}
         @if($section === 'overview')
             <x-nx-section icon="heroicon-o-identification" title="Steckbrief"
-                          description="Stammdaten & Kontakt des Betriebs (später aus CRM verheiratet).">
+                          description="Basis aus dem Org-Graphen, angereichert aus dem CRM (falls verknüpft).">
                 <x-nx-card>
-                    <x-nx-empty icon="heroicon-o-identification">
-                        Adresse, Ansprechpartner & Vertragsdaten kommen später aus dem CRM (loser Link).
-                    </x-nx-empty>
+                    <div class="space-y-3">
+                        {{-- Basis (immer, aus organization) --}}
+                        <div>
+                            <div class="text-sm font-medium text-[color:var(--nx-text)]">{{ $entity->name }}</div>
+                            <div class="text-xs text-[color:var(--nx-muted)]">{{ $entity->type?->name }}</div>
+                        </div>
+
+                        @if($crmProfile)
+                            {{-- CRM-Anreicherung (crm_company am selben Knoten, graph-nativ) --}}
+                            @php
+                                $labels = ['legal_name' => 'Rechtsname', 'status' => 'Status', 'industry' => 'Branche', 'address' => 'Anschrift', 'phone' => 'Telefon', 'email' => 'E-Mail', 'website' => 'Website', 'vat_number' => 'USt-IdNr'];
+                            @endphp
+                            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-sm border-t border-[color:var(--nx-line)] pt-3">
+                                @foreach($labels as $key => $label)
+                                    @if(!empty($crmProfile[$key]))
+                                        <div>
+                                            <dt class="text-[color:var(--nx-muted)]">{{ $label }}</dt>
+                                            <dd class="text-[color:var(--nx-text)]">{{ $crmProfile[$key] }}</dd>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </dl>
+                            <div class="inline-flex items-center gap-1 text-xs text-[color:var(--nx-faint)]">
+                                @svg('heroicon-o-link', 'w-3 h-3') Quelle: CRM (am Knoten verknüpft)
+                            </div>
+                        @else
+                            <div class="text-xs text-[color:var(--nx-faint)] border-t border-[color:var(--nx-line)] pt-3">
+                                Keine CRM-Firma verknüpft. Stammdaten & Kontakt erscheinen hier, sobald der Betrieb im CRM gepflegt und am Knoten verknüpft ist.
+                            </div>
+                        @endif
+                    </div>
                 </x-nx-card>
             </x-nx-section>
 

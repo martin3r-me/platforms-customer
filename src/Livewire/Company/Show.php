@@ -99,6 +99,7 @@ class Show extends Component
             'riskAssessments' => $riskAssessments,
             'patients'        => $patients,
             'sections'        => CompanySections::all(),
+            'crmProfile'      => \Platform\Customer\Support\CompanyProfile::crmForEntity($this->entityId),
         ])->layout('platform::layouts.app');
     }
 }
